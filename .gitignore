@@ -1,0 +1,41 @@
+# --- .NET Core / Visual Studio ---
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/wwwroot/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.db
+*.opendb
+*.log
+*.tmp
+*TestResult.xml
+**/publish/
+
+# --- React / Node.js ---
+**/node_modules/
+**/dist/
+**/build/
+**/coverage/
+.npm
+.yarn
+.cache
+package-lock.json
+yarn.lock
+
+# --- OS Specific ---
+.DS_Store
+Thumbs.db
+
+# --- Compressed Files ---
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
