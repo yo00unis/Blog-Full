@@ -18,8 +18,8 @@ export const authService = {
         return response.data;
     },
 
-    forgotPassword: async (email) => {
-        const response = await axiosInstance.post(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, { email });
+    forgotPassword: async (model) => {
+        const response = await axiosInstance.post(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, model);
         return response.data;
     },
 

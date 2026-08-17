@@ -8,6 +8,6 @@ namespace SharedLayer;
 
 public static class AppConstants
 {
-    public const string FrontUrlDevelopment = "https://localhost";
+    public const string FrontUrlDevelopment = "http://localhost:5173";
     public const string FrontUrlProduction = "https://localhost";
 }
