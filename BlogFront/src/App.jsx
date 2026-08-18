@@ -10,6 +10,7 @@ import ResetPassword from './pages/resetPassword/ResetPassword';
 import PostsPage from './pages/posts/PostsPage';
 import PostDetailsPage from './pages/posts/PostDetailsPage';
 import DashboardLayout from './pages/dashboard/DashboardLayout';
+import CategoriesPage from './pages/category/CategoriesPage';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route path={ROUTES.CHANGE_PASSWORD} element={<ChangePassword />} />
           <Route path={ROUTES.POSTS} element={<PostsPage />} />
           <Route path="/posts/:id" element={<PostDetailsPage />} />
+          <Route path={ROUTES.CATEGORIES} element={<CategoriesPage />} />
         </Route>
 
         {/* 3. Wildcard Route */}

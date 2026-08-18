@@ -26,8 +26,16 @@ public class CategoryService : ICategoryService
 
     public async Task<bool> DeleteAsync(int id)
     {
-        var category = await _context.Categories.FindAsync(id);
+        var category = await _context.Categories
+            .Include(c => c.Posts)
+            .FirstOrDefaultAsync(c => c.Id == id);
+
         if (category == null) return false;
+
+        if (category.Posts != null && category.Posts.Any())
+        {
+            throw new InvalidOperationException("Cannot delete this category because it has associated posts.");
+        }
 
         _context.Categories.Remove(category);
         await _context.SaveChangesAsync();

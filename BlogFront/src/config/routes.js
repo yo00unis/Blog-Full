@@ -6,4 +6,5 @@ export const ROUTES = {
     FORGOT_PASSWORD: `/forgot-password`,
     RESET_PASSWORD: `/reset-password`,
     POSTS: `/posts`,
+    CATEGORIES: `/categories`,
 };

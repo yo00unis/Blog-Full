@@ -49,6 +49,9 @@ export default function DashboardLayout() {
                         <Link to={ROUTES.POSTS} className="flex items-center gap-3 text-gray-600 hover:text-indigo-600 font-medium p-3 rounded-xl transition-colors">
                             <FileText size={20} /> Posts
                         </Link>
+                        <Link to={ROUTES.CATEGORIES} className="flex items-center gap-3 text-gray-600 hover:text-indigo-600 font-medium p-3 rounded-xl transition-colors">
+                            <FileText size={20} /> Categories
+                        </Link>
                     </nav>
                 </aside>
             )}
