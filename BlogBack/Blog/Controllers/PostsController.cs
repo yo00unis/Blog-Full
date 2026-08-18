@@ -29,7 +29,7 @@ public class PostsController : ControllerBase
     public async Task<IActionResult> GetAllPosts([FromQuery] PaginationParams paginationParams)
     {
         var posts = await _postService.GetAllPostsAsync(paginationParams);
-        return Ok(ApiResponse<object>.SuccessResult(posts));
+        return Ok(posts);
     }
 
     [AllowAnonymous]
@@ -70,6 +70,16 @@ public class PostsController : ControllerBase
         var updatedPost = await _postService.UpdatePostAsync(id, dto);
         if (updatedPost == null)
             return NotFound(new { message = "Post not found" });
+
+        return Ok(ApiResponse<object>.SuccessResult(updatedPost));
+    }
+
+    [HttpPut("Media/{mediaId}")]
+    public async Task<IActionResult> UpdateMedia(int mediaId, [FromBody] CreateMediaDto dto)
+    {
+        var updatedPost = await _mediaService.UpdateMediaAsync(mediaId, dto);
+        if (!updatedPost)
+            return StatusCode(StatusCodes.Status500InternalServerError, "Failed to update media");
 
         return Ok(ApiResponse<object>.SuccessResult(updatedPost));
     }

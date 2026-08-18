@@ -10,5 +10,6 @@ namespace BusinessLogicLayer.Services.Media;
 public interface IMediaService
 {
     Task<MediaResponseDto> AddMediaToPostAsync(int postId, CreateMediaDto dto);
+    Task<bool> UpdateMediaAsync(int mediaId, CreateMediaDto dto);
     Task<bool> DeleteMediaAsync(int mediaId);
 }

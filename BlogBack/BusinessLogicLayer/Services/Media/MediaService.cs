@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DataAccessLayer.Context;
 using DataAccessLayer.DTOs.Medias;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using SharedLayer.Helpers;
 
 namespace BusinessLogicLayer.Services.Media;
@@ -60,6 +61,22 @@ public class MediaService : IMediaService
 
         _context.Medias.Remove(media);
         await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> UpdateMediaAsync(int mediaId, CreateMediaDto dto)
+    {
+        var media = await _context.Medias.FirstOrDefaultAsync(p => p.Id == mediaId);
+
+        if (media == null)
+            return false;
+
+        media.Url = dto.Url;
+        media.MediaType = dto.MediaType;
+
+        _context.Medias.Update(media);
+        await _context.SaveChangesAsync();
+
         return true;
     }
 }

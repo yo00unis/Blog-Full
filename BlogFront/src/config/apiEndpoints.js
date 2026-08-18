@@ -15,9 +15,10 @@ export const API_ENDPOINTS = {
     BASE: `${BASE_URL}/Posts`,
     BY_ID: (id) => `${BASE_URL}/Posts/${id}`,
     ADD_MEDIA: (postId) => `${BASE_URL}/Posts/${postId}/media`,
+    UPDATE_MEDIA: (mediaId) => `${BASE_URL}/Posts/Media/${mediaId}`,
   },
   UPLOAD: {
-    IMAGE: `${BASE_URL}/Upload`,
+    IMAGE: `${BASE_URL}/Upload/image`,
     DOWNLOAD: (fileName) => `${BASE_URL}/Upload/download/${fileName}`,
   }
 };

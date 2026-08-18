@@ -41,11 +41,9 @@ public class PostService : IPostService
         await _context.Posts.AddAsync(post);
         await _context.SaveChangesAsync();
 
-        // جلب الـ BaseUrl لتنسيق روابط الـ Media للداونلود
         var request = _httpContextAccessor.HttpContext?.Request;
         var baseUrl = $"{request?.Scheme}://{request?.Host}";
 
-        // إرجاع PostResponseDto يمنع مشكلة الـ Object Cycle تماماً
         return new PostResponseDto
         {
             Id = post.Id,
@@ -93,10 +91,10 @@ public class PostService : IPostService
 
         return new PagedResult<PostResponseDto>
         {
-            Items = postDtos,
             PageNumber = paginationParams.PageNumber,
             PageSize = paginationParams.PageSize,
-            TotalCount = totalCount
+            TotalCount = totalCount,
+            Items = postDtos,
         };
     }
 

@@ -28,6 +28,11 @@ export const postService = {
         return response.data;
     },
 
+    updateMediaToPost: async (mediaId, mediaData) => {
+        const response = await axiosInstance.put(API_ENDPOINTS.POSTS.UPDATE_MEDIA(mediaId), mediaData);
+        return response.data;
+    },
+
     deletePost: async (id) => {
         const response = await axiosInstance.delete(API_ENDPOINTS.POSTS.BY_ID(id));
         return response.data;

@@ -27,7 +27,6 @@ public class BlogDbContext : IdentityDbContext<ApplicationUser>
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(BlogDbContext).Assembly);
     }
 
-    public DbSet<ContentItem> ContentItems { get; set; }
     public DbSet<Post> Posts { get; set; }
     public DbSet<Media> Medias { get; set; }
 
