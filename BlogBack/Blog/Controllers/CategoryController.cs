@@ -1,6 +1,7 @@
 ﻿using BusinessLogicLayer.Services.Category;
 using DataAccessLayer.DTOs.Response;
 using DataAccessLayer.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,6 +19,7 @@ public class CategoryController : ControllerBase
     }
 
     // GET: api/category
+    [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Category>>> GetAll()
     {
@@ -26,6 +28,7 @@ public class CategoryController : ControllerBase
     }
 
     // GET: api/category/5
+    [AllowAnonymous]
     [HttpGet("{id}")]
     public async Task<ActionResult<Category>> GetById(int id)
     {

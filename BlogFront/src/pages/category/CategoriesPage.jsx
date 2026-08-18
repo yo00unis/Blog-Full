@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { categoryService } from '../../services/categoryService';
+import { jwtService } from '../../services/jwtService';
 
 export default function CategoriesPage() {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     
     const [name, setName] = useState('');
     const [editingId, setEditingId] = useState(null);
@@ -11,8 +13,26 @@ export default function CategoriesPage() {
     const [error, setError] = useState('');
 
     useEffect(() => {
+        checkAuth();
         fetchCategories();
     }, []);
+
+    const checkAuth = () => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                if (!jwtService.isTokenExpired(token)) {
+                    setIsAuthenticated(true);
+                } else {
+                    setIsAuthenticated(false);
+                }
+            } catch (err) {
+                setIsAuthenticated(false);
+            }
+        } else {
+            setIsAuthenticated(false);
+        }
+    };
 
     const fetchCategories = async () => {
         try {
@@ -80,31 +100,33 @@ export default function CategoriesPage() {
 
             {error && <div style={{ background: '#f8d7da', color: '#842029', padding: '10px 15px', borderRadius: '6px', marginBottom: '20px', fontSize: '14px' }}>{error}</div>}
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '10px', marginBottom: '30px', background: '#f8f9fa', padding: '20px', borderRadius: '8px', border: '1px solid #eaeaea' }}>
-                <input 
-                    type="text" 
-                    placeholder="New category name..." 
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    style={{ flex: 1, padding: '12px', borderRadius: '6px', border: '1px solid #ced4da', fontSize: '15px', outline: 'none' }}
-                />
-                <button 
-                    type="submit" 
-                    disabled={saving}
-                    style={{ background: editingId ? '#ffc107' : '#0d6efd', color: editingId ? '#000' : '#fff', border: 'none', padding: '0 25px', borderRadius: '6px', cursor: 'pointer', fontWeight: '600', fontSize: '15px' }}
-                >
-                    {saving ? 'Saving...' : (editingId ? 'Update' : 'Add')}
-                </button>
-                {editingId && (
+            {isAuthenticated && (
+                <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '10px', marginBottom: '30px', background: '#f8f9fa', padding: '20px', borderRadius: '8px', border: '1px solid #eaeaea' }}>
+                    <input 
+                        type="text" 
+                        placeholder="New category name..." 
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        style={{ flex: 1, padding: '12px', borderRadius: '6px', border: '1px solid #ced4da', fontSize: '15px', outline: 'none' }}
+                    />
                     <button 
-                        type="button" 
-                        onClick={handleCancelEdit}
-                        style={{ background: '#6c757d', color: '#fff', border: 'none', padding: '0 15px', borderRadius: '6px', cursor: 'pointer', fontSize: '15px' }}
+                        type="submit" 
+                        disabled={saving}
+                        style={{ background: editingId ? '#ffc107' : '#0d6efd', color: editingId ? '#000' : '#fff', border: 'none', padding: '0 25px', borderRadius: '6px', cursor: 'pointer', fontWeight: '600', fontSize: '15px' }}
                     >
-                        Cancel
+                        {saving ? 'Saving...' : (editingId ? 'Update' : 'Add')}
                     </button>
-                )}
-            </form>
+                    {editingId && (
+                        <button 
+                            type="button" 
+                            onClick={handleCancelEdit}
+                            style={{ background: '#6c757d', color: '#fff', border: 'none', padding: '0 15px', borderRadius: '6px', cursor: 'pointer', fontSize: '15px' }}
+                        >
+                            Cancel
+                        </button>
+                    )}
+                </form>
+            )}
 
             {loading ? (
                 <p style={{ textAlign: 'center', color: '#666' }}>Loading categories...</p>
@@ -123,20 +145,22 @@ export default function CategoriesPage() {
                             }}
                         >
                             <span style={{ fontSize: '16px', color: '#333', fontWeight: '500' }}>{cat.name}</span>
-                            <div style={{ display: 'flex', gap: '10px' }}>
-                                <button 
-                                    onClick={() => handleEdit(cat)}
-                                    style={{ background: '#ffc107', color: '#000', border: 'none', padding: '6px 14px', borderRadius: '4px', cursor: 'pointer', fontWeight: '600', fontSize: '13px' }}
-                                >
-                                    Edit
-                                </button>
-                                <button 
-                                    onClick={() => handleDelete(cat.id)}
-                                    style={{ background: '#dc3545', color: '#fff', border: 'none', padding: '6px 14px', borderRadius: '4px', cursor: 'pointer', fontWeight: '600', fontSize: '13px' }}
-                                >
-                                    Delete
-                                </button>
-                            </div>
+                            {isAuthenticated && (
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <button 
+                                        onClick={() => handleEdit(cat)}
+                                        style={{ background: '#ffc107', color: '#000', border: 'none', padding: '6px 14px', borderRadius: '4px', cursor: 'pointer', fontWeight: '600', fontSize: '13px' }}
+                                    >
+                                        Edit
+                                    </button>
+                                    <button 
+                                        onClick={() => handleDelete(cat.id)}
+                                        style={{ background: '#dc3545', color: '#fff', border: 'none', padding: '6px 14px', borderRadius: '4px', cursor: 'pointer', fontWeight: '600', fontSize: '13px' }}
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>
