@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 import { postService } from '../../services/postService';
 
 export default function PostsPage() {
@@ -11,6 +13,13 @@ export default function PostsPage() {
     const [totalPages, setTotalPages] = useState(1);
 
     const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+    // حقول إنشاء بوست جديد
+    const [newTitle, setNewTitle] = useState('');
+    const [newContent, setNewContent] = useState('');
+    const [saving, setSaving] = useState(false);
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -21,17 +30,10 @@ export default function PostsPage() {
         try {
             setLoading(true);
             const response = await postService.getAllPosts(page, pageSize);
-
-            console.log('API full response:', response);
-
-            // لو الـ Axios Interceptor بيحط الـ Body جوا response.data
-            // ولو مش بيحطه، بنتعامل مع الـ response مباشرة
             const responseData = response.data || response;
 
             if (responseData && responseData.items) {
                 const rawItems = responseData.items;
-
-                // استبعاد الـ medias من كل بوست
                 const postsWithoutMedia = rawItems.map(({ medias, ...rest }) => rest);
 
                 setPosts(postsWithoutMedia);
@@ -47,6 +49,30 @@ export default function PostsPage() {
         }
     };
 
+    // دالة إنشاء بوست جديد باستخدام createPost
+    const handleCreatePost = async (e) => {
+        e.preventDefault();
+        if (!newTitle.trim() || !newContent.trim()) return;
+
+        try {
+            setSaving(true);
+            await postService.createPost({
+                title: newTitle.trim(),
+                content: newContent.trim()
+            });
+
+            setNewTitle('');
+            setNewContent('');
+            setIsAddModalOpen(false);
+            fetchPosts(1); // العودة للصفحة الأولى لعرض البوست الجديد
+            setPageNumber(1);
+        } catch (error) {
+            console.error('Error creating post:', error);
+        } finally {
+            setSaving(false);
+        }
+    };
+
     const handleConfirmDelete = async (id) => {
         try {
             await postService.deletePost(id);
@@ -57,15 +83,22 @@ export default function PostsPage() {
         }
     };
 
-    if (loading) return <div style={{ textAlign: 'center', padding: '100px', color: '#666', fontSize: '18px', fontFamily: 'sans-serif' }}>Loading posts...</div>;
+    if (loading && posts.length === 0) return <div style={{ textAlign: 'center', padding: '100px', color: '#666', fontSize: '18px', fontFamily: 'sans-serif' }}>Loading posts...</div>;
 
     return (
-        <div style={{ maxWidth: '100%', padding: '0', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', minHeight: '85vh', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        <div style={{ maxWidth: '100%', padding: '0', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', minHeight: '85vh', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative' }}>
 
             {/* Upper Content */}
             <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                     <h2 style={{ margin: '0', color: '#1a1a1a', fontSize: '26px', fontWeight: '700' }}>All Posts</h2>
+                    
+                    <button
+                        onClick={() => setIsAddModalOpen(true)}
+                        style={{ background: '#0d6efd', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '14px', boxShadow: '0 2px 4px rgba(13, 110, 253, 0.2)' }}
+                    >
+                        + Add New Post
+                    </button>
                 </div>
 
                 {posts.length === 0 ? (
@@ -83,7 +116,6 @@ export default function PostsPage() {
                                         dangerouslySetInnerHTML={{ __html: post.content ? (post.content.substring(0, 90) + '...') : '' }}
                                         style={{ color: '#555', fontSize: '14px', marginBottom: '15px', lineHeight: '1.5' }}
                                     />
-                                    {/* تم حذف كود عرض الـ Medias تماماً من هنا بناءً على طلبك */}
                                 </div>
 
                                 <div>
@@ -155,6 +187,67 @@ export default function PostsPage() {
                     >
                         Next
                     </button>
+                </div>
+            )}
+
+            {/* Modal إضافة بوست جديد */}
+            {isAddModalOpen && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px', boxSizing: 'border-box' }}>
+                    <div style={{ background: '#fff', width: '100%', maxWidth: '600px', borderRadius: '16px', padding: '30px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', boxSizing: 'border-box' }}>
+                        
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                            <h3 style={{ margin: 0, fontSize: '20px', color: '#1a1a1a', fontWeight: '700' }}>Create New Post</h3>
+                            <button 
+                                onClick={() => setIsAddModalOpen(false)}
+                                style={{ background: 'transparent', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#888' }}
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleCreatePost}>
+                            <div style={{ marginBottom: '20px' }}>
+                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#444', fontSize: '14px' }}>Title</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="Enter post title..."
+                                    value={newTitle}
+                                    onChange={(e) => setNewTitle(e.target.value)}
+                                    style={{ width: '100%', padding: '12px', boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #ced4da', fontSize: '15px', outline: 'none' }}
+                                    required
+                                />
+                            </div>
+
+                            <div style={{ marginBottom: '40px' }}>
+                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#444', fontSize: '14px' }}>Content</label>
+                                <div style={{ height: '220px', marginBottom: '10px' }}>
+                                    <ReactQuill 
+                                        theme="snow" 
+                                        value={newContent} 
+                                        onChange={setNewContent} 
+                                        style={{ background: '#fff', borderRadius: '8px', height: '170px' }}
+                                    />
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', borderTop: '1px solid #eaeaea', paddingTop: '20px' }}>
+                                <button 
+                                    type="button"
+                                    onClick={() => setIsAddModalOpen(false)}
+                                    style={{ background: '#6c757d', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '14px' }}
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    type="submit"
+                                    disabled={saving}
+                                    style={{ background: '#198754', color: '#fff', border: 'none', padding: '10px 24px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '14px' }}
+                                >
+                                    {saving ? 'Creating...' : 'Create Post'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             )}
         </div>
