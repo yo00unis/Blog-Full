@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BusinessLogicLayer.Services.Email;
 using BusinessLogicLayer.Services.JWT;
-using DataAccessLayer.DTOs;
+using DataAccessLayer.DTOs.Auth;
 using DataAccessLayer.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;

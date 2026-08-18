@@ -100,4 +100,19 @@ public class PublicHelperShared
     </body>
     </html>";
     }
+
+
+    public static bool IsGuidFileName(string url)
+    {
+        if (string.IsNullOrEmpty(url)) return false;
+
+        // فصل اسم الملف عن الامتداد (مثال: 259481a8bc844e508aba8cfb65c0a9a9.jpg)
+        var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(url);
+
+        bool is32Hex = fileNameWithoutExtension?.Length == 32 &&
+                       System.Text.RegularExpressions.Regex.IsMatch(fileNameWithoutExtension, "^[a-fA-F0-9]{32}$");
+
+        return is32Hex;
+    }
+
 }

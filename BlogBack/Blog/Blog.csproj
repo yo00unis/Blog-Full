@@ -25,4 +25,8 @@
     <ProjectReference Include="..\SharedLayer\SharedLayer.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
 </Project>

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DataAccessLayer.DTOs;
+using DataAccessLayer.DTOs.Auth;
 
 namespace BusinessLogicLayer.Services.Auth;
 

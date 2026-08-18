@@ -89,7 +89,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddAutoMapper(configuration => { }, typeof(BusinessLogicLayer.Mapper.MappingProfile).Assembly);
-
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -100,7 +100,7 @@ builder.Services.AddSwaggerGen(c =>
         Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
         Name = "Authorization",
         In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
+        Type = SecuritySchemeType.Http,
         Scheme = "Bearer"
     });
 
@@ -135,6 +135,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseStaticFiles();
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 

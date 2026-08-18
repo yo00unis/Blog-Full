@@ -1,8 +1,8 @@
 // apiEndpoints.js
 
-const BASE_URL = import.meta.env.MODE === 'production' 
-  ? 'https://api.yourdomain.com/api'  
-  : 'https://localhost:7034/api';  
+const BASE_URL = import.meta.env.MODE === 'production'
+  ? 'https://api.yourdomain.com/api'
+  : 'https://localhost:7034/api';
 
 export const API_ENDPOINTS = {
   AUTH: {
@@ -11,6 +11,14 @@ export const API_ENDPOINTS = {
     FORGOT_PASSWORD: `${BASE_URL}/auth/forgot-password`,
     RESET_PASSWORD: `${BASE_URL}/auth/reset-password`,
   },
+  POSTS: {
+    BASE: `${BASE_URL}/Posts`,
+    BY_ID: (id) => `${BASE_URL}/Posts/${id}`,
+    ADD_MEDIA: (postId) => `${BASE_URL}/Posts/${postId}/media`,
+  },
+  UPLOAD: {
+    IMAGE: `${BASE_URL}/Upload`,
+    DOWNLOAD: (fileName) => `${BASE_URL}/Upload/download/${fileName}`,
+  }
 };
-
 export default API_ENDPOINTS;

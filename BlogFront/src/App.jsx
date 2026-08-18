@@ -7,25 +7,32 @@ import NotFound from './pages/NotFound';
 import ChangePassword from './pages/changePassword/ChangePassword';
 import ForgotPassword from './pages/forgetPassword/ForgotPassword';
 import ResetPassword from './pages/resetPassword/ResetPassword';
+import PostsPage from './pages/posts/PostsPage';
+import PostDetailsPage from './pages/posts/PostDetailsPage';
+import DashboardLayout from './pages/dashboard/DashboardLayout';
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>        
-        {/* 1. Public Routes (Accessible only when NOT logged in) */}
+      <Routes>
+        {/* 1. Public Routes */}
         <Route element={<AuthGuard isPublicOnly={true} />}>
           <Route path={ROUTES.LOGIN} element={<Login />} />
           <Route path={ROUTES.FORGOT_PASSWORD} element={<ForgotPassword />} />
           <Route path={ROUTES.RESET_PASSWORD} element={<ResetPassword />} />
         </Route>
 
-        {/* 2. Protected Routes (Accessible only when logged in) */}
+        {/* 2. Protected Routes (مدمج فيها الـ AuthGuard وبعدها الـ DashboardLayout) */}
         <Route element={<AuthGuard isPublicOnly={false} />}>
-          <Route path={ROUTES.HOME} element={<Dashboard />} />
-          <Route path={ROUTES.CHANGE_PASSWORD} element={<ChangePassword />} />
+          <Route element={<DashboardLayout />}>
+            <Route path={ROUTES.HOME} element={<Dashboard />} />
+            <Route path={ROUTES.CHANGE_PASSWORD} element={<ChangePassword />} />
+            <Route path={ROUTES.POSTS} element={<PostsPage />} />
+            <Route path="/posts/:id" element={<PostDetailsPage />} />
+          </Route>
         </Route>
 
-        {/* 3. Wildcard Route (Must be at the very bottom) */}
+        {/* 3. Wildcard Route */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

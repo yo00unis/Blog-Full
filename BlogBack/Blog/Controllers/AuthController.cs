@@ -1,10 +1,10 @@
 ﻿using BusinessLogicLayer.Services.Auth;
 using DataAccessLayer.DTOs.Response;
-using DataAccessLayer.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using DataAccessLayer.DTOs.Auth;
 
 namespace Blog.Controllers;
 
