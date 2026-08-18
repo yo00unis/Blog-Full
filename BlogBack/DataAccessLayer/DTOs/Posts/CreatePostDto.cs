@@ -11,5 +11,6 @@ public class CreatePostDto
 {
     public string Title { get; set; } = string.Empty;
     public string? Content { get; set; }
+    public int CategoryId { get; set; }
     public List<CreateMediaDto> Medias { get; set; } = new List<CreateMediaDto>();
 }

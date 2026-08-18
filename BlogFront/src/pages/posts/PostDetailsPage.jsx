@@ -4,7 +4,7 @@ import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import { postService } from '../../services/postService';
 import { uploadService } from '../../services/uploadService';
-// استيراد خدمة الـ JWT للتحقق من التوكن
+import { categoryService } from '../../services/categoryService'; 
 import { jwtService } from '../../services/jwtService'; 
 
 export default function PostDetailsPage() {
@@ -23,6 +23,10 @@ export default function PostDetailsPage() {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     
+    // State خاصة بالـ Category للبوست والقائمة الخاصة بها
+    const [categoryId, setCategoryId] = useState('');
+    const [categories, setCategories] = useState([]);
+    
     const [newFiles, setNewFiles] = useState([]);
     const [newTextUrl, setNewTextUrl] = useState('');
     
@@ -33,7 +37,7 @@ export default function PostDetailsPage() {
 
     useEffect(() => {
         // التحقق من حالة تسجيل الدخول
-        const token = localStorage.getItem('token'); // تأكد من اسم مفتاح التخزين لديك
+        const token = localStorage.getItem('token');
         if (token) {
             try {
                 if (!jwtService.isTokenExpired(token)) {
@@ -45,6 +49,7 @@ export default function PostDetailsPage() {
         }
 
         fetchPostDetails();
+        fetchCategories(); // جلب الكاتيجوريز عند تحميل الصفحة
     }, [id]);
 
     const fetchPostDetails = async () => {
@@ -55,6 +60,8 @@ export default function PostDetailsPage() {
             setPost(postData);
             setTitle(postData.title);
             setContent(postData.content);
+            // ضبط قيمة الـ categoryId الحالية للبوست
+            setCategoryId(postData.categoryId || '');
         } catch (error) {
             console.error('Error fetching post details:', error);
         } finally {
@@ -62,9 +69,20 @@ export default function PostDetailsPage() {
         }
     };
 
+    // دالة لجلب الكاتيجوريز للقائمة المنسدلة
+    const fetchCategories = async () => {
+        try {
+            const response = await categoryService.getAll();
+            const data = response.data || response;
+            setCategories(Array.isArray(data) ? data : data.items || []);
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+        }
+    };
+
     const handleUpdatePost = async (e) => {
         e.preventDefault();
-        if (!isAuthenticated) return; // حماية إضافية
+        if (!isAuthenticated) return;
         try {
             setSaving(true);
             if (!title.trim() || !content.trim()) {
@@ -72,7 +90,13 @@ export default function PostDetailsPage() {
                 return;
             }
 
-            const updateData = { title, content };
+            // إرسال الـ categoryId مع البيانات المحدثة
+            const updateData = { 
+                title, 
+                content, 
+                categoryId: categoryId ? Number(categoryId) : null 
+            };
+            
             await postService.updatePost(id, updateData);
 
             setIsEditing(false);
@@ -166,7 +190,6 @@ export default function PostDetailsPage() {
                     ← Back
                 </button>
 
-                {/* زر Edit Post يظهر فقط إذا كان المستخدم مسجل دخوله (isAuthenticated) */}
                 {isAuthenticated && !isEditing && (
                     <button 
                         onClick={() => setIsEditing(true)}
@@ -214,14 +237,14 @@ export default function PostDetailsPage() {
                     ))}
                 </div>
 
-                {/* إذا لم يكن في وضع التعديل، أو لم يكن مسجلاً من الأساس، سيظهر وضع العرض فقط (View Mode) */}
                 {!isEditing || !isAuthenticated ? (
                     <div style={{ flex: 1 }}>
                         {activeTab === 'details' ? (
                             <div>
                                 <h1 style={{ marginTop: '0', color: '#1a1a1a', fontSize: '32px', marginBottom: '15px' }}>{post.title}</h1>
                                 <div style={{ color: '#888', fontSize: '14px', marginBottom: '25px' }}>
-                                    Published on {new Date(post.createdAt).toLocaleDateString()}
+                                    Published on {new Date(post.createdAt).toLocaleDateString()} 
+                                    {post.categoryName && ` • Category: ${post.categoryName}`}
                                 </div>
                                 <div style={{ height: '1px', background: '#f0f0f0', marginBottom: '30px' }} />
                                 <div 
@@ -253,13 +276,15 @@ export default function PostDetailsPage() {
                         )}
                     </div>
                 ) : (
-                    /* ================= EDIT MODE (يظهر فقط للمستخدم المسجل دخوله وفي وضع التعديل) ================= */
+                    /* ================= EDIT MODE ================= */
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                         
                         <div>
                             {activeTab === 'details' ? (
                                 <form onSubmit={handleUpdatePost}>
-                                    <h2 style={{ marginTop: '0', marginBottom: '25px', color: '#1a1a1a', fontSize: '22px' }}>Edit Title & Content</h2>
+                                    <h2 style={{ marginTop: '0', marginBottom: '25px', color: '#1a1a1a', fontSize: '22px' }}>Edit Title, Content & Category</h2>
+                                    
+                                    {/* حقل التعديل: العنوان */}
                                     <div style={{ marginBottom: '25px' }}>
                                         <label style={{ display: 'block', marginBottom: '10px', fontWeight: '600', color: '#444', fontSize: '15px' }}>Title</label>
                                         <input 
@@ -270,6 +295,24 @@ export default function PostDetailsPage() {
                                         />
                                     </div>
 
+                                    {/* حقل التعديل: اختيار الفئة (Category Dropdown) */}
+                                    <div style={{ marginBottom: '25px' }}>
+                                        <label style={{ display: 'block', marginBottom: '10px', fontWeight: '600', color: '#444', fontSize: '15px' }}>Category</label>
+                                        <select
+                                            value={categoryId}
+                                            onChange={(e) => setCategoryId(e.target.value)}
+                                            style={{ width: '100%', padding: '14px', boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #ced4da', fontSize: '16px', outline: 'none', background: '#fff', cursor: 'pointer' }}
+                                        >
+                                            <option value="">Select Category (اختر الفئة)</option>
+                                            {categories.map((cat) => (
+                                                <option key={cat.id} value={cat.id}>
+                                                    {cat.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {/* حقل التعديل: المحتوى */}
                                     <div style={{ marginBottom: '30px' }}>
                                         <label style={{ display: 'block', marginBottom: '10px', fontWeight: '600', color: '#444', fontSize: '15px' }}>Content</label>
                                         <div style={{ marginBottom: '50px' }}>
@@ -281,6 +324,7 @@ export default function PostDetailsPage() {
                                             />
                                         </div>
                                     </div>
+
                                     <button 
                                         type="submit" 
                                         disabled={saving}
@@ -293,7 +337,6 @@ export default function PostDetailsPage() {
                                 <div>
                                     <h2 style={{ marginTop: '0', marginBottom: '25px', color: '#1a1a1a', fontSize: '22px' }}>Manage {activeTab}</h2>
                                     
-                                    {/* عرض وتعديل وحذف الميديا الحالية */}
                                     <div style={{ marginBottom: '30px' }}>
                                         <label style={{ display: 'block', marginBottom: '12px', fontWeight: '600', color: '#444', fontSize: '15px' }}>Current {activeTab}</label>
                                         {post.medias && post.medias.filter(m => m.mediaType === activeTab).length > 0 ? (
@@ -351,7 +394,6 @@ export default function PostDetailsPage() {
                                         )}
                                     </div>
 
-                                    {/* إضافة ميديا جديدة */}
                                     <div style={{ marginBottom: '30px' }}>
                                         <label style={{ display: 'block', marginBottom: '10px', fontWeight: '600', color: '#444', fontSize: '15px' }}>
                                             Add New {activeTab} {activeTab === 'Image' ? '(Upload File)' : '(String URL)'}
@@ -382,7 +424,7 @@ export default function PostDetailsPage() {
                                             <div style={{ display: 'flex', gap: '10px' }}>
                                                 <input 
                                                     type="text" 
-                                                        placeholder={`Enter ${activeTab} URL...`}
+                                                    placeholder={`Enter ${activeTab} URL...`}
                                                     value={newTextUrl}
                                                     onChange={(e) => setNewTextUrl(e.target.value)}
                                                     style={{ flex: 1, padding: '12px', boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #ced4da', fontSize: '15px', outline: 'none' }}
@@ -402,7 +444,6 @@ export default function PostDetailsPage() {
                             )}
                         </div>
 
-                        {/* زر الخروج من وضع التعديل */}
                         <div style={{ display: 'flex', gap: '15px', borderTop: '1px solid #eaeaea', paddingTop: '25px', marginTop: '20px' }}>
                             <button 
                                 type="button" 

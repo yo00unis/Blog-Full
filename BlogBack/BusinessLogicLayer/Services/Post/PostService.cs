@@ -31,6 +31,7 @@ public class PostService : IPostService
             Title = dto.Title,
             Content = dto.Content,
             CreatedAt = DateTime.UtcNow,
+            CategoryId = dto.CategoryId,
             Medias = dto.Medias.Select(m => new DataAccessLayer.Models.Media
             {
                 Url = m.Url,
@@ -61,15 +62,20 @@ public class PostService : IPostService
         };
     }
 
-    public async Task<PagedResult<PostResponseDto>> GetAllPostsAsync(PaginationParams paginationParams)
+    public async Task<PagedResult<PostResponseDto>> GetAllPostsAsync(GetPostsDto dto)
     {
         var totalCount = await _context.Posts.CountAsync();
 
-        var posts = await _context.Posts
+        var query = _context.Posts.AsQueryable();
+
+        if (dto.CategoryId.HasValue) query = query.Where(e => e.CategoryId == dto.CategoryId);
+        if (!string.IsNullOrWhiteSpace(dto.Title)) query = query.Where(e => e.Title == dto.Title);
+
+        var posts = await query
             .Include(p => p.Medias)
             .OrderByDescending(p => p.CreatedAt)
-            .Skip((paginationParams.PageNumber - 1) * paginationParams.PageSize)
-            .Take(paginationParams.PageSize)
+            .Skip((dto.PageNumber - 1) * dto.PageSize)
+            .Take(dto.PageSize)
             .ToListAsync();
 
         var request = _httpContextAccessor.HttpContext?.Request;
@@ -81,6 +87,7 @@ public class PostService : IPostService
             Title = p.Title,
             Content = p.Content,
             CreatedAt = p.CreatedAt,
+            CategoryId = p.CategoryId,
             Medias = p.Medias!.Select(m => new MediaResponseDto
             {
                 Id = m.Id,
@@ -91,8 +98,8 @@ public class PostService : IPostService
 
         return new PagedResult<PostResponseDto>
         {
-            PageNumber = paginationParams.PageNumber,
-            PageSize = paginationParams.PageSize,
+            PageNumber = dto.PageNumber,
+            PageSize = dto.PageSize,
             TotalCount = totalCount,
             Items = postDtos,
         };
@@ -116,6 +123,7 @@ public class PostService : IPostService
             Title = post.Title,
             Content = post.Content,
             CreatedAt = post.CreatedAt,
+            CategoryId = post.CategoryId,
             Medias = post.Medias!.Select(m => new MediaResponseDto
             {
                 Id = m.Id,
@@ -136,6 +144,7 @@ public class PostService : IPostService
 
         post.Title = dto.Title;
         post.Content = dto.Content;
+        post.CategoryId = dto.CategoryId.HasValue ? dto.CategoryId.Value : post.CategoryId;
 
         _context.Posts.Update(post);
         await _context.SaveChangesAsync();

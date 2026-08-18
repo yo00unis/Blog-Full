@@ -3,8 +3,21 @@ import API_ENDPOINTS from '../config/apiEndpoints';
 import axiosInstance from './axiosConfig';
 
 export const postService = {
-    getAllPosts: async (pageNumber = 1, pageSize = 10) => {
-        const response = await axiosInstance.get(`${API_ENDPOINTS.POSTS.BASE}?pageNumber=${pageNumber}&pageSize=${pageSize}`);
+    getAllPosts: async (pageNumber = 1, pageSize = 10, categoryId = '', title = '') => {
+        const params = new URLSearchParams({
+            pageNumber,
+            pageSize
+        });
+
+        if (categoryId !== '' && categoryId !== null && categoryId !== undefined) {
+            params.append('categoryId', categoryId);
+        }
+
+        if (title && title.trim() !== '') {
+            params.append('title', title.trim());
+        }
+
+        const response = await axiosInstance.get(`${API_ENDPOINTS.POSTS.BASE}?${params.toString()}`);
         return response.data;
     },
 

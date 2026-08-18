@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DataAccessLayer.DTOs.Pagenation;
 
 namespace DataAccessLayer.DTOs.Posts;
 
-public class UpdatePostDto
+public class GetPostsDto : PaginationParams
 {
-    public string Title { get; set; } = string.Empty;
-    public string? Content { get; set; }
     public int? CategoryId { get; set; }
+    public string? Title { get; set; }
 }

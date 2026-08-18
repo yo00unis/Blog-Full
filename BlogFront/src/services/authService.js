@@ -30,7 +30,7 @@ export const authService = {
 
     logout: async () => {
         localStorage.clear();
-        window.location.href = `${ROUTES.LOGIN}`;
+        // window.location.href = `${ROUTES.LOGIN}`;
     }
 
 };

@@ -17,9 +17,14 @@ export const API_ENDPOINTS = {
     ADD_MEDIA: (postId) => `${BASE_URL}/Posts/${postId}/media`,
     UPDATE_MEDIA: (mediaId) => `${BASE_URL}/Posts/Media/${mediaId}`,
   },
+  CATEGORY: {
+    BASE: `${BASE_URL}/Category`,
+    BY_ID: (id) => `${BASE_URL}/Category/${id}`,
+  },
   UPLOAD: {
     IMAGE: `${BASE_URL}/Upload/image`,
     DOWNLOAD: (fileName) => `${BASE_URL}/Upload/download/${fileName}`,
   }
 };
+
 export default API_ENDPOINTS;

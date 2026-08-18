@@ -26,9 +26,9 @@ public class PostsController : ControllerBase
 
     [AllowAnonymous]
     [HttpGet]
-    public async Task<IActionResult> GetAllPosts([FromQuery] PaginationParams paginationParams)
+    public async Task<IActionResult> GetAllPosts([FromQuery] GetPostsDto dto)
     {
-        var posts = await _postService.GetAllPostsAsync(paginationParams);
+        var posts = await _postService.GetAllPostsAsync(dto);
         return Ok(posts);
     }
 
