@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import { postService } from '../../services/postService';
+import { jwtService } from '../../services/jwtService'; // استيراد خدمة التحقق من التوكن
 
 export default function PostsPage() {
     const [posts, setPosts] = useState([]);
@@ -15,12 +16,24 @@ export default function PostsPage() {
     const [deleteConfirmId, setDeleteConfirmId] = useState(null);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-    // حقول إنشاء بوست جديد
     const [newTitle, setNewTitle] = useState('');
     const [newContent, setNewContent] = useState('');
     const [saving, setSaving] = useState(false);
 
     const navigate = useNavigate();
+
+    // التحقق من حالة تسجيل الدخول وصلاحية التوكن بدقة
+    const checkAuth = () => {
+        const token = localStorage.getItem('token');
+        if (!token) return false;
+        try {
+            return !jwtService.isTokenExpired(token);
+        } catch (e) {
+            return false;
+        }
+    };
+
+    const isAuthenticated = checkAuth();
 
     useEffect(() => {
         fetchPosts(pageNumber);
@@ -49,9 +62,9 @@ export default function PostsPage() {
         }
     };
 
-    // دالة إنشاء بوست جديد باستخدام createPost
     const handleCreatePost = async (e) => {
         e.preventDefault();
+        if (!isAuthenticated) return; // حماية إضافية ضد الـ bypass
         if (!newTitle.trim() || !newContent.trim()) return;
 
         try {
@@ -64,7 +77,7 @@ export default function PostsPage() {
             setNewTitle('');
             setNewContent('');
             setIsAddModalOpen(false);
-            fetchPosts(1); // العودة للصفحة الأولى لعرض البوست الجديد
+            fetchPosts(1);
             setPageNumber(1);
         } catch (error) {
             console.error('Error creating post:', error);
@@ -74,6 +87,7 @@ export default function PostsPage() {
     };
 
     const handleConfirmDelete = async (id) => {
+        if (!isAuthenticated) return; // حماية إضافية ضد الـ bypass
         try {
             await postService.deletePost(id);
             setDeleteConfirmId(null);
@@ -93,12 +107,15 @@ export default function PostsPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                     <h2 style={{ margin: '0', color: '#1a1a1a', fontSize: '26px', fontWeight: '700' }}>All Posts</h2>
                     
-                    <button
-                        onClick={() => setIsAddModalOpen(true)}
-                        style={{ background: '#0d6efd', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '14px', boxShadow: '0 2px 4px rgba(13, 110, 253, 0.2)' }}
-                    >
-                        + Add New Post
-                    </button>
+                    {/* يظهر زر الإضافة فقط إذا كان مسجلاً دخوله وتوكنه صالحاً */}
+                    {isAuthenticated && (
+                        <button
+                            onClick={() => setIsAddModalOpen(true)}
+                            style={{ background: '#0d6efd', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '14px', boxShadow: '0 2px 4px rgba(13, 110, 253, 0.2)' }}
+                        >
+                            + Add New Post
+                        </button>
+                    )}
                 </div>
 
                 {posts.length === 0 ? (
@@ -150,12 +167,15 @@ export default function PostsPage() {
                                                 View Details
                                             </button>
 
-                                            <button
-                                                onClick={() => setDeleteConfirmId(post.id)}
-                                                style={{ background: '#fff', color: '#dc3545', border: '1px solid #dc3545', padding: '10px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}
-                                            >
-                                                Delete
-                                            </button>
+                                            {/* يظهر زر الحذف فقط إذا كان مسجلاً دخوله وتوكنه صالحاً */}
+                                            {isAuthenticated && (
+                                                <button
+                                                    onClick={() => setDeleteConfirmId(post.id)}
+                                                    style={{ background: '#fff', color: '#dc3545', border: '1px solid #dc3545', padding: '10px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}
+                                                >
+                                                    Delete
+                                                </button>
+                                            )}
                                         </div>
                                     )}
                                 </div>
@@ -165,7 +185,7 @@ export default function PostsPage() {
                 )}
             </div>
 
-            {/* Pagination في أسفل الصفحة تماماً */}
+            {/* Pagination */}
             {posts.length > 0 && (
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', marginTop: '40px', paddingBottom: '20px', borderTop: '1px solid #eaeaea', paddingTop: '20px' }}>
                     <button
@@ -191,7 +211,7 @@ export default function PostsPage() {
             )}
 
             {/* Modal إضافة بوست جديد */}
-            {isAddModalOpen && (
+            {isAddModalOpen && isAuthenticated && (
                 <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px', boxSizing: 'border-box' }}>
                     <div style={{ background: '#fff', width: '100%', maxWidth: '600px', borderRadius: '16px', padding: '30px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', boxSizing: 'border-box' }}>
                         

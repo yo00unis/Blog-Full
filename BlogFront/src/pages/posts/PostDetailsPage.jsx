@@ -4,6 +4,8 @@ import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import { postService } from '../../services/postService';
 import { uploadService } from '../../services/uploadService';
+// استيراد خدمة الـ JWT للتحقق من التوكن
+import { jwtService } from '../../services/jwtService'; 
 
 export default function PostDetailsPage() {
     const { id } = useParams();
@@ -12,23 +14,36 @@ export default function PostDetailsPage() {
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
+    
+    // State للتحقق هل المستخدم مسجل دخول أم لا
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     const [activeTab, setActiveTab] = useState('details'); // 'details' | 'Image' | 'Music' | 'Link'
 
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     
-    // لإضافة ميديا جديدة
     const [newFiles, setNewFiles] = useState([]);
     const [newTextUrl, setNewTextUrl] = useState('');
     
-    // لتعديل ميديا موجودة
     const [editingMediaId, setEditingMediaId] = useState(null);
     const [editTextUrl, setEditTextUrl] = useState('');
 
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
+        // التحقق من حالة تسجيل الدخول
+        const token = localStorage.getItem('token'); // تأكد من اسم مفتاح التخزين لديك
+        if (token) {
+            try {
+                if (!jwtService.isTokenExpired(token)) {
+                    setIsAuthenticated(true);
+                }
+            } catch (e) {
+                setIsAuthenticated(false);
+            }
+        }
+
         fetchPostDetails();
     }, [id]);
 
@@ -47,9 +62,9 @@ export default function PostDetailsPage() {
         }
     };
 
-    // تحديث تفاصيل البوست (Title & Content)
     const handleUpdatePost = async (e) => {
         e.preventDefault();
+        if (!isAuthenticated) return; // حماية إضافية
         try {
             setSaving(true);
             if (!title.trim() || !content.trim()) {
@@ -69,8 +84,8 @@ export default function PostDetailsPage() {
         }
     };
 
-    // إضافة ميديا جديدة باستخدام addMediaToPost
     const handleAddNewMedia = async () => {
+        if (!isAuthenticated) return;
         try {
             setSaving(true);
 
@@ -100,8 +115,8 @@ export default function PostDetailsPage() {
         }
     };
 
-    // دالة حذف الميديا باستخدام deleteMedia الخاصة بك
     const handleDeleteMediaItem = async (mediaId) => {
+        if (!isAuthenticated) return;
         try {
             setSaving(true);
             await postService.deleteMedia(mediaId);
@@ -113,8 +128,8 @@ export default function PostDetailsPage() {
         }
     };
 
-    // دالة تحديث ميديا باستخدام updateMediaToPost
     const handleUpdateMediaItem = async (mediaId) => {
+        if (!isAuthenticated) return;
         if (!editTextUrl.trim()) return;
         try {
             setSaving(true);
@@ -151,7 +166,8 @@ export default function PostDetailsPage() {
                     ← Back
                 </button>
 
-                {!isEditing && (
+                {/* زر Edit Post يظهر فقط إذا كان المستخدم مسجل دخوله (isAuthenticated) */}
+                {isAuthenticated && !isEditing && (
                     <button 
                         onClick={() => setIsEditing(true)}
                         style={{ background: '#0d6efd', color: '#fff', border: 'none', padding: '10px 24px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', boxShadow: '0 2px 4px rgba(13, 110, 253, 0.2)' }}
@@ -198,8 +214,8 @@ export default function PostDetailsPage() {
                     ))}
                 </div>
 
-                {!isEditing ? (
-                    /* ================= VIEW MODE ================= */
+                {/* إذا لم يكن في وضع التعديل، أو لم يكن مسجلاً من الأساس، سيظهر وضع العرض فقط (View Mode) */}
+                {!isEditing || !isAuthenticated ? (
                     <div style={{ flex: 1 }}>
                         {activeTab === 'details' ? (
                             <div>
@@ -237,7 +253,7 @@ export default function PostDetailsPage() {
                         )}
                     </div>
                 ) : (
-                    /* ================= EDIT MODE ================= */
+                    /* ================= EDIT MODE (يظهر فقط للمستخدم المسجل دخوله وفي وضع التعديل) ================= */
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                         
                         <div>
@@ -366,7 +382,7 @@ export default function PostDetailsPage() {
                                             <div style={{ display: 'flex', gap: '10px' }}>
                                                 <input 
                                                     type="text" 
-                                                    placeholder={`Enter ${activeTab} URL...`}
+                                                        placeholder={`Enter ${activeTab} URL...`}
                                                     value={newTextUrl}
                                                     onChange={(e) => setNewTextUrl(e.target.value)}
                                                     style={{ flex: 1, padding: '12px', boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #ced4da', fontSize: '15px', outline: 'none' }}

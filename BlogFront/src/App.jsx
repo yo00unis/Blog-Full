@@ -15,21 +15,19 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* 1. Public Routes */}
+        {/* 1. Public Auth Routes */}
         <Route element={<AuthGuard isPublicOnly={true} />}>
           <Route path={ROUTES.LOGIN} element={<Login />} />
           <Route path={ROUTES.FORGOT_PASSWORD} element={<ForgotPassword />} />
           <Route path={ROUTES.RESET_PASSWORD} element={<ResetPassword />} />
         </Route>
 
-        {/* 2. Protected Routes (مدمج فيها الـ AuthGuard وبعدها الـ DashboardLayout) */}
-        <Route element={<AuthGuard isPublicOnly={false} />}>
-          <Route element={<DashboardLayout />}>
-            <Route path={ROUTES.HOME} element={<Dashboard />} />
-            <Route path={ROUTES.CHANGE_PASSWORD} element={<ChangePassword />} />
-            <Route path={ROUTES.POSTS} element={<PostsPage />} />
-            <Route path="/posts/:id" element={<PostDetailsPage />} />
-          </Route>
+        {/* 2. All Main Routes are now Publicly Accessible inside DashboardLayout */}
+        <Route element={<DashboardLayout />}>
+          <Route path={ROUTES.HOME} element={<Dashboard />} />
+          <Route path={ROUTES.CHANGE_PASSWORD} element={<ChangePassword />} />
+          <Route path={ROUTES.POSTS} element={<PostsPage />} />
+          <Route path="/posts/:id" element={<PostDetailsPage />} />
         </Route>
 
         {/* 3. Wildcard Route */}
