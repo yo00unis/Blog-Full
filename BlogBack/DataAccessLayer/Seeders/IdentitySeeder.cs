@@ -18,28 +18,36 @@ public static class DataSeeder
         // 1. Seeding Users
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
-        const string email = "ymtawfiq2003@gmail.com";
-        const string password = "22";
-
-        var user = await userManager.FindByEmailAsync(email);
-
-        if (user == null)
+        var usersData = new Dictionary<string, string>
         {
-            user = new ApplicationUser
-            {
-                UserName = email,
-                Email = email,
-                EmailConfirmed = true
-            };
+            {"ymtawfiq2003@gmail.com", "22" },
+            {"fatmaeed2001@gmail.com", "22" },
+        };
 
-            var result = await userManager.CreateAsync(user, password);
+        foreach(var userData in usersData)
+        {
+            var user = await userManager.FindByEmailAsync(userData.Key);
 
-            if (!result.Succeeded)
+            if (user == null)
             {
-                var errors = string.Join(", ", result.Errors.Select(x => x.Description));
-                throw new Exception($"Failed to create default admin user: {errors}");
+                user = new ApplicationUser
+                {
+                    UserName = userData.Key,
+                    Email = userData.Key,
+                    EmailConfirmed = true
+                };
+
+                var result = await userManager.CreateAsync(user, userData.Value);
+
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(x => x.Description));
+                    throw new Exception($"Failed to create default admin user: {errors}");
+                }
             }
         }
+
+        
 
         // 2. Seeding Posts and Media
         var context = services.GetRequiredService<BlogDbContext>();
