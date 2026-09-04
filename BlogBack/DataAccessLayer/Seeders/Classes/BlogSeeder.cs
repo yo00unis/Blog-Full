@@ -5,51 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 using DataAccessLayer.Context;
 using DataAccessLayer.Models;
-using Microsoft.AspNetCore.Identity;
+using DataAccessLayer.Seeders.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DataAccessLayer.Seeders;
+namespace DataAccessLayer.Seeders.Classes;
 
-public static class DataSeeder
+
+public class BlogSeeder : ISeeder
 {
-    public static async Task SeedAsync(IServiceProvider services)
+    public async Task SeedAsync(IServiceProvider services)
     {
-        // 1. Seeding Users
-        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-
-        var usersData = new Dictionary<string, string>
-        {
-            {"ymtawfiq2003@gmail.com", "22" },
-            {"fatmaeed2001@gmail.com", "22" },
-        };
-
-        foreach(var userData in usersData)
-        {
-            var user = await userManager.FindByEmailAsync(userData.Key);
-
-            if (user == null)
-            {
-                user = new ApplicationUser
-                {
-                    UserName = userData.Key,
-                    Email = userData.Key,
-                    EmailConfirmed = true
-                };
-
-                var result = await userManager.CreateAsync(user, userData.Value);
-
-                if (!result.Succeeded)
-                {
-                    var errors = string.Join(", ", result.Errors.Select(x => x.Description));
-                    throw new Exception($"Failed to create default admin user: {errors}");
-                }
-            }
-        }
-
-        
-
-        // 2. Seeding Posts and Media
         var context = services.GetRequiredService<BlogDbContext>();
 
         if (!await context.Categories.AnyAsync())
@@ -58,7 +24,7 @@ public static class DataSeeder
             var lifeCategory = new Category { Name = "Lifestyle" };
 
             context.Categories.AddRange(techCategory, lifeCategory);
-            await context.SaveChangesAsync(); 
+            await context.SaveChangesAsync();
 
             var samplePosts = new List<Post>
             {
@@ -67,7 +33,7 @@ public static class DataSeeder
                     Title = "Welcome to my new blog!",
                     Content = "This is the first post on my blog...",
                     CreatedAt = DateTime.UtcNow,
-                    Category = techCategory, 
+                    Category = techCategory,
                     Medias = new List<Media>
                     {
                         new Media { Url = "https://example.com/images/intro.jpg", MediaType = "Image" }
@@ -78,7 +44,7 @@ public static class DataSeeder
                     Title = "My Favorite Coding Playlist",
                     Content = "Here are some great music tracks...",
                     CreatedAt = DateTime.UtcNow.AddDays(-1),
-                    Category = lifeCategory, 
+                    Category = lifeCategory,
                     Medias = new List<Media>
                     {
                         new Media { Url = "https://youtube.com/watch?v=example", MediaType = "Link" }

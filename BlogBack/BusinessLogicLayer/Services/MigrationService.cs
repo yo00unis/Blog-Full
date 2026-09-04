@@ -56,7 +56,7 @@ public class MigrationService<TContext> : IHostedService
             }
 
             // Always run seeders
-            await DataSeeder.SeedAsync(scope.ServiceProvider);
+            await MainSeeder.SeedAsync(scope.ServiceProvider);
 
             _logger.LogInformation("Database seeding completed successfully.");
         }
