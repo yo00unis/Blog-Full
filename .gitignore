@@ -8,7 +8,6 @@
 *.user
 *.suo
 *.userosscache
-*.sln
 *.sln.docstates
 *.db
 *.opendb
